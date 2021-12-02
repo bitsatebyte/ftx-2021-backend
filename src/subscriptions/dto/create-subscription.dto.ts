@@ -31,4 +31,8 @@ export class CreateSubscriptionDto {
   @IsArray()
   @IsOptional()
   readonly custom: Array<Record<string, any>>;
+
+  @IsOptional()
+  @IsNumber()
+  readonly customerId: number;
 }

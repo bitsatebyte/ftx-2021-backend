@@ -1,7 +1,10 @@
+import { Customer } from 'src/customers/entities/customer.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,8 +14,9 @@ export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  userId: string;
+  @OneToMany((type) => Customer, (customer) => customer.id)
+  @JoinColumn({ name: 'customer_id' })
+  customerId: number;
 
   @CreateDateColumn({ name: 'start_date' })
   startDate: Date;
