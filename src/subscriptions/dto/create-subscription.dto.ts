@@ -1,20 +1,15 @@
 import {
   IsIn,
   IsArray,
-  IsUUID,
   IsDateString,
   IsString,
   IsNumber,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateSubscriptionDto {
-  @IsUUID()
-  readonly subscriptionId: string;
-
   @IsDateString()
-  readonly startDate: string;
-
-  @IsDateString()
+  @IsOptional()
   readonly endDate: string;
 
   @IsString()
@@ -24,6 +19,7 @@ export class CreateSubscriptionDto {
   readonly budget: number;
 
   @IsString()
+  @IsOptional()
   readonly isPaused: boolean;
 
   @IsIn(['orders', 'appointments'])
@@ -33,5 +29,6 @@ export class CreateSubscriptionDto {
   readonly default: Array<Record<string, any>>;
 
   @IsArray()
+  @IsOptional()
   readonly custom: Array<Record<string, any>>;
 }

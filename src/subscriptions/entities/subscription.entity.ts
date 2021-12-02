@@ -29,12 +29,12 @@ export class Subscription {
   @Column()
   type: string;
 
-  @Column({ type: 'jsonb', array: true, nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
   default: Array<Record<string, any>>;
 
   @Column()
   budget: number;
 
-  @Column({ type: 'jsonb', array: true, nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
   custom: Array<Record<string, any>>;
 }
