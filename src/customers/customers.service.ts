@@ -29,7 +29,7 @@ export class CustomersService {
   async findAll() {
     try {
       const customers = await this.customerRepository.find({
-        relations: ['subscriptions'],
+        relations: ['subscriptions', 'orders'],
       });
       if (!customers) {
         throw new NotFoundException('Subscription not found');
@@ -43,7 +43,7 @@ export class CustomersService {
   async findOne(id: number) {
     try {
       const customer = this.customerRepository.findOne(id, {
-        relations: ['subscriptions'],
+        relations: ['subscriptions', 'orders'],
       });
       if (!customer) {
         throw new NotFoundException('Subscription not found');

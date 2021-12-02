@@ -1,3 +1,4 @@
+import { Order } from 'src/orders/entities/order.entity';
 import { Subscription } from 'src/subscriptions/entities/subscription.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -19,5 +20,8 @@ export class Customer {
   phone: string;
 
   @OneToMany(() => Subscription, (subscription) => subscription.customer)
-  subscriptions: Subscription[];
+  subscriptions: Array<Subscription>;
+
+  @OneToMany(() => Order, (order) => order.customer)
+  orders: Array<Order>;
 }
