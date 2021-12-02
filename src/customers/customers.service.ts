@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -22,12 +26,32 @@ export class CustomersService {
     }
   }
 
-  findAll() {
-    return `This action returns all customers`;
+  async findAll() {
+    try {
+      const customers = await this.customerRepository.find({
+        relations: ['subscriptions'],
+      });
+      if (!customers) {
+        throw new NotFoundException('Subscription not found');
+      }
+      return customers;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  async findOne(id: number) {
+    try {
+      const customer = this.customerRepository.findOne(id, {
+        relations: ['subscriptions'],
+      });
+      if (!customer) {
+        throw new NotFoundException('Subscription not found');
+      }
+      return customer;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   update(id: number, updateCustomerDto: UpdateCustomerDto) {

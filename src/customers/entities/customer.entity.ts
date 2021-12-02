@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Subscription } from 'src/subscriptions/entities/subscription.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Customer {
@@ -16,4 +17,7 @@ export class Customer {
 
   @Column()
   phone: string;
+
+  @OneToMany(() => Subscription, (subscription) => subscription.customer)
+  subscriptions: Subscription[];
 }

@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -14,9 +15,9 @@ export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany((type) => Customer, (customer) => customer.id)
+  @ManyToOne(() => Customer, (customer) => customer.subscriptions)
   @JoinColumn({ name: 'customer_id' })
-  customerId: number;
+  customer: Customer;
 
   @CreateDateColumn({ name: 'start_date' })
   startDate: Date;
@@ -41,4 +42,7 @@ export class Subscription {
 
   @Column({ type: 'jsonb', nullable: true })
   custom: Array<Record<string, any>>;
+
+  @Column()
+  time: string;
 }

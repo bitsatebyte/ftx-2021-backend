@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
 } from 'class-validator';
+import { Customer } from 'src/customers/entities/customer.entity';
 
 export class CreateSubscriptionDto {
   @IsDateString()
@@ -34,5 +35,11 @@ export class CreateSubscriptionDto {
 
   @IsOptional()
   @IsNumber()
-  readonly customerId: number;
+  customerId: number;
+
+  @IsOptional()
+  customer: Customer;
+
+  @IsString()
+  readonly time: string;
 }
