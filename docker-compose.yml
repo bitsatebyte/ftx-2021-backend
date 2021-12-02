@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  ftx-postgres:
+    container_name: ftx-postgres
+    image: postgres:alpine
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+
+networks:
+  default:
+    external:
+      name: ftx-network
