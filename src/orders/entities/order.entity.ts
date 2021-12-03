@@ -1,4 +1,5 @@
 import { Customer } from 'src/customers/entities/customer.entity';
+import { Item } from 'src/subscriptions/types/items';
 import {
   Column,
   Entity,
@@ -6,25 +7,29 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { OrderStatus } from '../types/order.status';
 
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Customer, (customer) => customer.orders)
+  @ManyToOne(() => Customer, (customer) => customer.orders, { eager: true })
   @JoinColumn({ name: 'customer_id' })
   customer: Customer;
 
   @Column({ type: 'jsonb' })
-  items: Array<Record<string, any>>;
+  items: Array<Item>;
 
   @Column()
   restaurant: string;
 
   @Column()
-  value: number;
+  total: number;
+
+  @Column()
+  status: OrderStatus;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
 }

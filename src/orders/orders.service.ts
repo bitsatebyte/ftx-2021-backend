@@ -18,8 +18,8 @@ export class OrdersService {
   async create(createOrderDto: CreateOrderDto) {
     const order = this.orderRepository.create(createOrderDto);
     try {
-      await this.orderRepository.save(order);
-      return createOrderDto;
+      const save = await this.orderRepository.save(order);
+      return save;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -41,8 +41,13 @@ export class OrdersService {
     return `This action returns a #${id} order`;
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
+    try {
+      await this.orderRepository.update(id, updateOrderDto);
+      return true;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   remove(id: number) {

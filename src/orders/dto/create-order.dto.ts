@@ -4,23 +4,30 @@ import {
   IsNumber,
   IsOptional,
   ValidateNested,
+  IsIn,
 } from 'class-validator';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { Item } from 'src/subscriptions/types/items';
+import { OrderStatus } from '../types/order.status';
 export class CreateOrderDto {
   @IsOptional()
   @ValidateNested()
-  customer: Customer;
+  customer?: Customer;
 
   @IsArray()
-  readonly items: Array<Record<string, number>>;
+  readonly items: Array<Item>;
 
   @IsString()
   readonly restaurant: string;
 
   @IsNumber()
-  readonly value: number;
+  readonly total: number;
+
+  @IsString()
+  @IsIn(['processing', 'accepted', 'delivered', 'cancelled'])
+  status: OrderStatus;
 
   @IsOptional()
   @IsString()
-  readonly description: string;
+  readonly description?: string;
 }
