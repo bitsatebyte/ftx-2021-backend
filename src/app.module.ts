@@ -4,6 +4,8 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersModule } from './customers/customers.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { CustomersModule } from './customers/customers.module';
     AppointmentsModule,
     SubscriptionsModule,
     CustomersModule,
+    ScheduleModule.forRoot(),
+    TasksModule,
   ],
   controllers: [],
   providers: [],
