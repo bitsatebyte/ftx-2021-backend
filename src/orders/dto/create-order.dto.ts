@@ -7,9 +7,6 @@ import {
 } from 'class-validator';
 import { Customer } from 'src/customers/entities/customer.entity';
 export class CreateOrderDto {
-  @IsNumber()
-  customerId: number;
-
   @IsOptional()
   @ValidateNested()
   customer: Customer;

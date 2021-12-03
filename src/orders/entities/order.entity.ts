@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn('increment')
   id: number;
