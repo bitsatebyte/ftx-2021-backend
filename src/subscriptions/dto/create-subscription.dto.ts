@@ -13,9 +13,6 @@ export class CreateSubscriptionDto {
   @IsOptional()
   readonly endDate: string;
 
-  @IsString()
-  readonly userId: string;
-
   @IsNumber()
   readonly budget: number;
 
