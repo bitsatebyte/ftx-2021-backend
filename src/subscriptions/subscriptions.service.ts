@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  Inject,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -22,8 +22,14 @@ export class SubscriptionsService {
   async create(createSubscriptionDto: CreateSubscriptionDto) {
     const { customerId } = createSubscriptionDto;
     const customer = await this.customersService.findOne(customerId);
-    delete createSubscriptionDto.customerId;
     createSubscriptionDto.customer = customer;
+    const now = new Date();
+    // set the end date to 90 days from now
+    createSubscriptionDto.endDate = new Date(
+      now.setDate(now.getDate() + 90),
+    ).toLocaleDateString();
+    createSubscriptionDto.subscriber = { status: 'active', id: 1 };
+    delete createSubscriptionDto.customerId;
     const subscription = this.subscriptionRepository.create(
       createSubscriptionDto,
     );
@@ -38,9 +44,6 @@ export class SubscriptionsService {
   async findAll() {
     try {
       const subscriptions = await this.subscriptionRepository.find();
-      if (!subscriptions) {
-        throw new NotFoundException('Subscription not found');
-      }
       return subscriptions;
     } catch (error) {
       throw new BadRequestException(error);
@@ -50,9 +53,6 @@ export class SubscriptionsService {
   async findOne(id: string) {
     try {
       const subscription = this.subscriptionRepository.findOne(id);
-      if (!subscription) {
-        throw new NotFoundException('Subscription not found');
-      }
       return subscription;
     } catch (error) {
       throw new BadRequestException(error);
@@ -61,10 +61,21 @@ export class SubscriptionsService {
 
   async update(id: string, updateSubscriptionDto: UpdateSubscriptionDto) {
     try {
+      const subscription = await this.subscriptionRepository.findOne(id);
+      this.handleSubscriptionExceptions(subscription);
       await this.subscriptionRepository.update(id, updateSubscriptionDto);
       return true;
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+
+  handleSubscriptionExceptions(subscription: Subscription): void {
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+    if (subscription.subscriber.status === 'cancelled') {
+      throw new ForbiddenException('Subscription is cancelled');
     }
   }
 

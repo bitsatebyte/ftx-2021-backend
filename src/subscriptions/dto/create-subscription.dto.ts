@@ -1,36 +1,38 @@
 import {
   IsIn,
-  IsArray,
   IsDateString,
   IsString,
   IsNumber,
   IsOptional,
+  ValidateNested,
 } from 'class-validator';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { Items } from '../types/items';
+import { Status } from '../types/status';
+import { subscriptionType } from '../types/subscription.type';
 
 export class CreateSubscriptionDto {
   @IsDateString()
   @IsOptional()
-  readonly endDate: string;
+  endDate?: string;
 
   @IsNumber()
   readonly budget: number;
 
-  @IsString()
   @IsOptional()
-  readonly isPaused: boolean;
+  @ValidateNested()
+  subscriber?: Status;
 
-  @IsIn(['orders', 'appointments'])
-  readonly type: string;
+  @IsIn(['order', 'appointment'])
+  readonly subscriptionType: subscriptionType;
 
-  @IsArray()
-  readonly default: Array<Record<string, any>>;
+  @ValidateNested()
+  readonly default: Items;
 
-  @IsArray()
+  @ValidateNested()
   @IsOptional()
-  readonly custom: Array<Record<string, any>>;
+  readonly custom: Items;
 
-  @IsOptional()
   @IsNumber()
   customerId: number;
 

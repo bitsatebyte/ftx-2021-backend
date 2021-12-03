@@ -8,6 +8,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Items } from '../types/items';
+import { Status } from '../types/status';
+import { subscriptionType } from '../types/subscription.type';
 
 @Entity()
 export class Subscription {
@@ -29,20 +32,20 @@ export class Subscription {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Column('boolean', { name: 'is_paused', default: false })
-  isPaused: boolean;
+  @Column('jsonb')
+  subscriber: Status;
 
-  @Column()
-  type: string;
+  @Column({ name: 'subscription_type' })
+  subscriptionType: subscriptionType;
 
   @Column({ type: 'jsonb', nullable: true })
-  default: Array<Record<string, any>>;
+  default?: Items;
 
   @Column()
   budget: number;
 
   @Column({ type: 'jsonb', nullable: true })
-  custom: Array<Record<string, any>>;
+  custom?: Items;
 
   @Column()
   time: string;
