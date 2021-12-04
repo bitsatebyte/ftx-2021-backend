@@ -54,8 +54,13 @@ export class CustomersService {
     }
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    try {
+      await this.customerRepository.update(id, updateCustomerDto);
+      return true;
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
   }
 
   remove(id: number) {
