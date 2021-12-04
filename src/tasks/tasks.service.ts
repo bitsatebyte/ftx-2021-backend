@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
 import { OrdersService } from 'src/orders/orders.service';
@@ -13,6 +13,7 @@ import { AppointmentsService } from 'src/appointments/appointments.service';
 import { CreateAppointmentDto } from 'src/appointments/dto/create-appointment.dto';
 import { AppointmentItem } from 'src/appointments/types/appointment.type';
 import { Establishment } from 'src/appointments/types/establishment.type';
+import { isEmpty } from 'lodash';
 
 @Injectable()
 export class TasksService {
@@ -47,8 +48,8 @@ export class TasksService {
         // this.socket.emit('order.create', { order });
 
         // run order processing events
-        this.orderProcessing(order.id, 'accepted');
-        this.orderProcessing(order.id, 'delivered');
+        await this.orderProcessing(order.id, 'accepted');
+        await this.orderProcessing(order.id, 'delivered');
       }
     });
   }
@@ -59,7 +60,12 @@ export class TasksService {
     if (!subscriptions.length) return;
     subscriptions.forEach(async (subscription) => {
       const { subscriptionType } = subscription;
-      this.handleSubscriptionExceptions(subscription);
+      try {
+        this.handleSubscriptionExceptions(subscription);
+      } catch (error) {
+        this.logger.error(error.message);
+        throw new NotAcceptableException(error.message);
+      }
       if (subscriptionType === 'appointment') {
         const appointmentDto = this.prepareAppointmentEntity(subscription);
         // log appointment placing event
@@ -85,7 +91,7 @@ export class TasksService {
     let defaultOrder = subscription.default;
     custom = custom as Items;
     defaultOrder = defaultOrder as Items;
-    const restaurant = defaultOrder.restaurant;
+    let restaurant = defaultOrder.restaurant;
     const items: Item[] = [];
     if (!custom) {
       for (const key in defaultOrder.list) {
@@ -95,6 +101,7 @@ export class TasksService {
       for (const key in custom.list) {
         items.push(custom.list[key]);
       }
+      restaurant = custom.restaurant;
     }
     const order = {
       customer,
@@ -133,20 +140,33 @@ export class TasksService {
   }
 
   handleSubscriptionExceptions(options: Subscription) {
-    const { custom, endDate, budget, subscriber } = options;
+    const { endDate, budget, subscriber } = options;
+    const custom = options.custom as Items;
+    const defaultOrder = options.default;
     const subscriptionEndDate = new Date(endDate).getTime();
     const today = new Date().getTime();
     const hasSubscriptionExpired = subscriptionEndDate <= today;
-    // check if subscription has expired
-    if (hasSubscriptionExpired || subscriber === 'cancelled')
-      throw new SubscriptionExpiredException();
-    // check if subscription is on pause
-    if (subscriber === 'paused') throw new SubscriptionPausedException();
-    // check if budget has exceeded
-    if (custom && custom.total > budget) throw new BudgetExceededException();
+    try {
+      // check if subscription has expired
+      if (hasSubscriptionExpired || subscriber === 'cancelled')
+        throw new SubscriptionExpiredException();
+      // check if subscription is on pause
+      if (subscriber === 'paused') throw new SubscriptionPausedException();
+      // check if budget has exceeded
+      if (
+        (!isEmpty(custom) && custom.total > budget) ||
+        defaultOrder.total > budget
+      ) {
+        this.subscriptionsService.update(options.id, {
+          subscriber: 'cancelled',
+        });
+      }
+    } catch (e) {
+      throw new NotAcceptableException(e.message);
+    }
   }
 
-  orderProcessing(id: number, status: OrderStatus) {
+  async orderProcessing(id: number, status: OrderStatus) {
     setTimeout(() => this.ordersService.update(id, { status }), 2000);
   }
 }

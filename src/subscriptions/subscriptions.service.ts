@@ -2,11 +2,13 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomersService } from 'src/customers/customers.service';
+import { Customer } from 'src/customers/entities/customer.entity';
 import { Repository } from 'typeorm';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
@@ -19,10 +21,13 @@ export class SubscriptionsService {
     private readonly subscriptionRepository: Repository<Subscription>,
     private readonly customersService: CustomersService,
   ) {}
+  private readonly logger: Logger = new Logger(SubscriptionsService.name);
 
   async create(createSubscriptionDto: CreateSubscriptionDto) {
     const { customerId } = createSubscriptionDto;
     const customer = await this.customersService.findOne(customerId);
+    // check if subscription already exists
+    this.handleDuplicateSubscription(customer, createSubscriptionDto);
     createSubscriptionDto.customer = customer;
     const now = new Date();
     if (customer.walletBalance < createSubscriptionDto.budget) {
@@ -73,7 +78,11 @@ export class SubscriptionsService {
   async update(id: string, updateSubscriptionDto: UpdateSubscriptionDto) {
     try {
       const subscription = await this.subscriptionRepository.findOne(id);
-      this.handleSubscriptionExceptions(subscription);
+      try {
+        this.handleSubscriptionExceptions(subscription);
+      } catch (error) {
+        throw new NotAcceptableException(error.message);
+      }
       await this.subscriptionRepository.update(id, updateSubscriptionDto);
       return true;
     } catch (error) {
@@ -82,12 +91,30 @@ export class SubscriptionsService {
   }
 
   handleSubscriptionExceptions(subscription: Subscription): void {
-    if (!subscription) {
-      throw new NotFoundException('Subscription not found');
+    try {
+      if (!subscription) {
+        throw new NotFoundException('Subscription not found');
+      }
+      if (subscription.subscriber === 'cancelled') {
+        throw new ForbiddenException('Subscription is cancelled');
+      }
+    } catch (e) {
+      throw new NotAcceptableException(e.message);
     }
-    if (subscription.subscriber === 'cancelled') {
-      throw new ForbiddenException('Subscription is cancelled');
-    }
+  }
+
+  handleDuplicateSubscription(
+    customer: Customer,
+    subscription: CreateSubscriptionDto,
+  ) {
+    const { subscriptions } = customer;
+    const isDuplicate = subscriptions.find(
+      (sub) =>
+        sub.subscriptionType === subscription.subscriptionType &&
+        sub.subscriber !== 'cancelled',
+    );
+    if (isDuplicate)
+      throw new NotAcceptableException('Subscription already exists');
   }
 
   remove(id: string) {
