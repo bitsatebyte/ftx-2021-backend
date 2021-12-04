@@ -1,3 +1,4 @@
+import { AppointmentItem } from 'src/appointments/types/appointment.type';
 import { Customer } from 'src/customers/entities/customer.entity';
 import {
   Column,
@@ -8,8 +9,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Items } from '../types/items';
-import { Status } from '../types/status';
+import { Items } from '../types/items.type';
+import { Status } from '../types/status.type';
 import { subscriptionType } from '../types/subscription.type';
 
 @Entity()
@@ -39,13 +40,13 @@ export class Subscription {
   subscriptionType: subscriptionType;
 
   @Column({ type: 'jsonb', nullable: true })
-  default?: Items;
+  default?: Items | AppointmentItem;
 
   @Column()
   budget: number;
 
   @Column({ type: 'jsonb', nullable: true })
-  custom?: Items;
+  custom?: Items | AppointmentItem;
 
   @Column()
   time: string;

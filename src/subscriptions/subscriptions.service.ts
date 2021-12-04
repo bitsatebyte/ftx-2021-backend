@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,11 +25,21 @@ export class SubscriptionsService {
     const customer = await this.customersService.findOne(customerId);
     createSubscriptionDto.customer = customer;
     const now = new Date();
+    if (customer.walletBalance < createSubscriptionDto.budget) {
+      throw new NotAcceptableException(
+        `Wallet balance is low! Please recharge`,
+      );
+    }
+    const updatedWalletBalance =
+      customer.walletBalance - createSubscriptionDto.budget;
+    this.customersService.update(customerId, {
+      walletBalance: updatedWalletBalance,
+    });
     // set the end date to 90 days from now
     createSubscriptionDto.endDate = new Date(
       now.setDate(now.getDate() + 90),
     ).toLocaleDateString();
-    createSubscriptionDto.subscriber = { status: 'active', id: 1 };
+    createSubscriptionDto.subscriber = 'active';
     delete createSubscriptionDto.customerId;
     const subscription = this.subscriptionRepository.create(
       createSubscriptionDto,
@@ -74,7 +85,7 @@ export class SubscriptionsService {
     if (!subscription) {
       throw new NotFoundException('Subscription not found');
     }
-    if (subscription.subscriber.status === 'cancelled') {
+    if (subscription.subscriber === 'cancelled') {
       throw new ForbiddenException('Subscription is cancelled');
     }
   }

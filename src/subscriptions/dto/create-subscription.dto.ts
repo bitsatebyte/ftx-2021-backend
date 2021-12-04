@@ -7,8 +7,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Customer } from 'src/customers/entities/customer.entity';
-import { Items } from '../types/items';
-import { Status } from '../types/status';
+import { AppointmentItem } from '../../appointments/types/appointment.type';
+import { Items } from '../types/items.type';
+import { Status } from '../types/status.type';
 import { subscriptionType } from '../types/subscription.type';
 
 export class CreateSubscriptionDto {
@@ -20,18 +21,17 @@ export class CreateSubscriptionDto {
   readonly budget: number;
 
   @IsOptional()
-  @ValidateNested()
   subscriber?: Status;
 
   @IsIn(['order', 'appointment'])
   readonly subscriptionType: subscriptionType;
 
   @ValidateNested()
-  readonly default: Items;
+  readonly default: Items | AppointmentItem;
 
   @ValidateNested()
   @IsOptional()
-  readonly custom: Items;
+  readonly custom: Items | AppointmentItem;
 
   @IsNumber()
   customerId: number;
