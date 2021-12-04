@@ -15,7 +15,9 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
   ) {}
+
   async create(createOrderDto: CreateOrderDto) {
+    createOrderDto.status = 'processing';
     const order = this.orderRepository.create(createOrderDto);
     try {
       const save = await this.orderRepository.save(order);

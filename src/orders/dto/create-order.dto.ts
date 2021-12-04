@@ -7,8 +7,8 @@ import {
   IsIn,
 } from 'class-validator';
 import { Customer } from 'src/customers/entities/customer.entity';
-import { Item } from 'src/subscriptions/types/items';
-import { OrderStatus } from '../types/order.status';
+import { Item } from 'src/subscriptions/types/items.type';
+import { OrderStatus } from '../types/order.status.type';
 export class CreateOrderDto {
   @IsOptional()
   @ValidateNested()
